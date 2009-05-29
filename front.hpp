@@ -5,11 +5,17 @@
 # define FRONT_DWA200957_HPP
 
 # include "./type.hpp"
+# include "./empty.hpp"
+# include "./disable_if.hpp"
 
 extern struct front_
 {
     template <class T>
-    auto operator()(type_<T>& x) -> decltype(front_impl(type<T>()));
+    auto operator()(type_<T>& x) ->
+        decltype(
+            disable_if(
+                empty(type<T>()),
+                front_impl(type<T>())));
 }&
 front;
 

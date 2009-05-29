@@ -5,11 +5,18 @@
 # define POP_FRONT_DWA200957_HPP
 
 # include "./type.hpp"
+# include "./empty.hpp"
+# include "./disable_if.hpp"
 
 extern struct pop_front_
 {
     template <class T>
-    auto operator()(type_<T>& x) -> decltype(pop_front_impl(type<T>()));
+    auto operator()(type_<T>& x)
+        -> decltype(
+            disable_if(
+                empty(type<T>()),
+                pop_front_impl(type<T>()))
+            );
 }&
 pop_front;
 
