@@ -215,6 +215,26 @@ inline void test_front()
     assert_same<front<drop<2,seq>::type>::type, long> a2;
 }
 
+//
+//   back -- return the last type in the sequence
+//___________________________________________________________
+template <class S> struct back;
+
+template <class...T>
+struct back<types<T...> >
+  : nth_type<sizeof...(T)-1, types<T...> >
+{};
+
+
+inline void test_back()
+{
+    using seq = types<void(int),char[3],long>;
+    
+    assert_same<back<take<1,seq>::type>::type, void(int)> a0;
+    assert_same<back<take<2,seq>::type>::type, char[3]> a1;
+    assert_same<back<take<3,seq>::type>::type, long> a2;
+}
+
 int main()
 {
 }
