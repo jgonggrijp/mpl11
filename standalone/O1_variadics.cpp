@@ -53,6 +53,12 @@ namespace check_places
   assert_same<make_places<5>::type, places<_,_,_,_,_> > a5;
 }
 
+// Generic type sequence
+template <class...T> struct types
+{
+    typedef types type;
+};
+
 // Wrapper to prevent type decay
 template <class T>
 struct no_decay
@@ -77,17 +83,14 @@ struct nth_type_impl<places<X...> >
 
 // Select the Nth type in O(1) (once all the necessary places<...> have
 // been instantiated, which is O(log N) but happens only once.
+template <unsigned N, class S> struct nth_type;
+
 template <unsigned N, class...T>
-struct nth_type
+struct nth_type<N, types<T...> >
   : decltype(
       nth_type_impl<typename make_places<N>::type>::result(
           (no_decay<T>*)0 ...))
 {};
-
-template <class...T> struct types
-{
-    typedef types type;
-};
 
 // inner beauty
 template <class T> struct drop_impl;
@@ -109,9 +112,11 @@ struct drop
 
 int main()
 {
-    {  assert_same<nth_type<0,void(int),char[3],long>::type, void(int)> a; }
-    {  assert_same<nth_type<1,void(int),char[3],long>::type, char[3]> a; }
-    {  assert_same<nth_type<2,void(int),char[3],long>::type, long> a; }
+    using seq = types<void(int),char[3],long>;
+    
+    {  assert_same<nth_type<0,seq>::type, void(int)> a; }
+    {  assert_same<nth_type<1,seq>::type, char[3]> a; }
+    {  assert_same<nth_type<2,seq>::type, long> a; }
 
     {  assert_same<
            drop<0,void(int),char[3],long>::type,
