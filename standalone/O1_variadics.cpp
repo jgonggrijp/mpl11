@@ -2,7 +2,16 @@
 // Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-// Placeholders for variadic template trix
+//
+//   assert_same -- a low-rent assertion
+//__________________________________________________________
+template <class T, class U> struct assert_same;
+template <class T> struct assert_same<T,T> {};
+
+//
+//   places -- a wrapper for "N variadic parameters"
+//__________________________________________________________
+
 enum place { _ };
 template <place...>
 struct places {};
@@ -16,9 +25,7 @@ struct append_places<places<X1...>, places<X2...> >
     typedef places<X1...,X2...> type;
 };
 
-//
 // Generate places<_,_,_,..._> with N arguments in O(log N)
-//
 template <unsigned N>
 struct make_places
   : append_places<
@@ -27,25 +34,10 @@ struct make_places
     >
 {};
 
-template <>
-struct make_places<0>
-{
-    typedef places<> type;
-};
+template <> struct make_places<0> { typedef places<> type; };
+template <> struct make_places<1> { typedef places<_> type; };
 
-template <>
-struct make_places<1>
-{
-    typedef places<_> type;
-};
-
-//
-// Low-rent assertions
-//
-template <class T, class U> struct assert_same;
-template <class T> struct assert_same<T,T> {};
-
-namespace check_places
+inline void test_places()
 {
   assert_same<make_places<2>::type, places<_,_> > a2;
   assert_same<make_places<3>::type, places<_,_,_> > a3;
@@ -53,11 +45,17 @@ namespace check_places
   assert_same<make_places<5>::type, places<_,_,_,_,_> > a5;
 }
 
-// Generic type sequence
+//
+//   types -- a basic type sequence
+//__________________________________________________________
 template <class...T> struct types
 {
     typedef types type;
 };
+
+//
+//   nth_type -- get the Nth type in a sequence in O(1)
+//__________________________________________________________
 
 // Wrapper to prevent type decay
 template <class T>
@@ -92,6 +90,20 @@ struct nth_type<N, types<T...> >
           (no_decay<T>*)0 ...))
 {};
 
+inline void test_nth_type()
+{
+    using seq = types<void(int),char[3],long>;
+    
+    {  assert_same<nth_type<0,seq>::type, void(int)> a; }
+    {  assert_same<nth_type<1,seq>::type, char[3]> a; }
+    {  assert_same<nth_type<2,seq>::type, long> a; }
+}
+    
+//
+//   drop -- drop N elements from the front of a type sequence in O(1)
+//______________________________________________________________________
+
+
 // inner beauty
 template <class T> struct drop_impl;
 
@@ -111,28 +123,16 @@ struct drop<N, types<T...> >
           (no_decay<T>*)0 ...))
 {};
 
-
-int main()
+inline void test_drop()
 {
     using seq = types<void(int),char[3],long>;
     
-    {  assert_same<nth_type<0,seq>::type, void(int)> a; }
-    {  assert_same<nth_type<1,seq>::type, char[3]> a; }
-    {  assert_same<nth_type<2,seq>::type, long> a; }
+    assert_same<drop<0,seq>::type, types<void(int),char[3],long> > a0;
+    assert_same<drop<1,seq>::type, types<char[3],long> > a1;
+    assert_same<drop<2,seq>::type, types<long> > a2;
+    assert_same<drop<3,seq>::type, types<> > a3;
+}
 
-    {  assert_same<
-           drop<0,seq>::type,
-           types<void(int),char[3],long> > a; }
-    
-    {  assert_same<
-           drop<1,seq>::type,
-           types<char[3],long> > a; }
-    
-    {  assert_same<
-           drop<2,seq>::type,
-           types<long> > a; }
-    
-    {  assert_same<
-           drop<3,seq>::type,
-           types<> > a; }
+int main()
+{
 }
