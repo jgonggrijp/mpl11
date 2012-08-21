@@ -102,8 +102,10 @@ struct drop_impl<places<X...> >
     static types<Tail...> result(eat<X>..., no_decay<Tail>*...);
 };
 
+template <unsigned N, class S> struct drop;
+
 template <unsigned N, class...T>
-struct drop
+struct drop<N, types<T...> >
   : decltype(
       drop_impl<typename make_places<N>::type>::result(
           (no_decay<T>*)0 ...))
@@ -119,18 +121,18 @@ int main()
     {  assert_same<nth_type<2,seq>::type, long> a; }
 
     {  assert_same<
-           drop<0,void(int),char[3],long>::type,
+           drop<0,seq>::type,
            types<void(int),char[3],long> > a; }
     
     {  assert_same<
-           drop<1,void(int),char[3],long>::type,
+           drop<1,seq>::type,
            types<char[3],long> > a; }
     
     {  assert_same<
-           drop<2,void(int),char[3],long>::type,
+           drop<2,seq>::type,
            types<long> > a; }
     
     {  assert_same<
-           drop<3,void(int),char[3],long>::type,
+           drop<3,seq>::type,
            types<> > a; }
 }
