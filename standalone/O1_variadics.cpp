@@ -195,6 +195,26 @@ inline void test_take()
     assert_same<take<4,seq>::type, seq> a4;
 }
 
+//
+//   front -- return the first type in the sequence
+//___________________________________________________________
+template <class S> struct front;
+
+template <class H, class...T>
+struct front<types<H,T...> >
+{
+    typedef H type;
+};
+
+inline void test_front()
+{
+    using seq = types<void(int),char[3],long>;
+    
+    assert_same<front<drop<0,seq>::type>::type, void(int)> a0;
+    assert_same<front<drop<1,seq>::type>::type, char[3]> a1;
+    assert_same<front<drop<2,seq>::type>::type, long> a2;
+}
+
 int main()
 {
 }
