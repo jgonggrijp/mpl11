@@ -66,13 +66,13 @@ struct eat
 { eat(...); };
 
 // inner beauty
-template <class T> struct select;
+template <class T> struct nth_type_impl;
 
 template <place...X>
-struct select<places<X...> >
+struct nth_type_impl<places<X...> >
 {
     template <class U, class...Tail>
-    static U fetch(eat<X>..., U*, Tail*...);
+    static U result(eat<X>..., U*, Tail*...);
 };
 
 // Select the Nth type in O(1) (once all the necessary places<...> have
@@ -80,13 +80,52 @@ struct select<places<X...> >
 template <unsigned N, class...T>
 struct nth_type
   : decltype(
-      select<typename make_places<N>::type>::fetch(
+      nth_type_impl<typename make_places<N>::type>::result(
           (no_decay<T>*)0 ...))
 {};
+
+template <class...T> struct types
+{
+    typedef types type;
+};
+
+// inner beauty
+template <class T> struct drop_impl;
+
+template <place...X>
+struct drop_impl<places<X...> >
+{
+    template <class...Tail>
+    static types<Tail...> result(eat<X>..., no_decay<Tail>*...);
+};
+
+template <unsigned N, class...T>
+struct drop
+  : decltype(
+      drop_impl<typename make_places<N>::type>::result(
+          (no_decay<T>*)0 ...))
+{};
+
 
 int main()
 {
     {  assert_same<nth_type<0,void(int),char[3],long>::type, void(int)> a; }
     {  assert_same<nth_type<1,void(int),char[3],long>::type, char[3]> a; }
     {  assert_same<nth_type<2,void(int),char[3],long>::type, long> a; }
+
+    {  assert_same<
+           drop<0,void(int),char[3],long>::type,
+           types<void(int),char[3],long> > a; }
+    
+    {  assert_same<
+           drop<1,void(int),char[3],long>::type,
+           types<char[3],long> > a; }
+    
+    {  assert_same<
+           drop<2,void(int),char[3],long>::type,
+           types<long> > a; }
+    
+    {  assert_same<
+           drop<3,void(int),char[3],long>::type,
+           types<> > a; }
 }
