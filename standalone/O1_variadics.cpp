@@ -167,6 +167,34 @@ inline void test_make_indices()
     assert_same<make_indices<12>::type, indices<0,1,2,3,4,5,6,7,8,9,10,11> > a0;
 }
 
+//
+//   take -- return the first N types in the sequence
+//   Note: this is an O(N) algorithm.
+//___________________________________________________________
+template <class I, class S> struct take_impl;
+
+template <unsigned...N, class S>
+struct take_impl<indices<N...>, S>
+{
+    typedef types<typename nth_type<N,S>::type...> type;
+};
+
+template <unsigned N, class S>
+struct take
+  : take_impl<typename make_indices<N>::type, S>
+{};
+
+inline void test_take()
+{
+    using seq = types<void(int),char[3],long,double>;
+    
+    assert_same<take<0,seq>::type, types<> > a0;
+    assert_same<take<1,seq>::type, types<void(int)> > a1;
+    assert_same<take<2,seq>::type, types<void(int),char[3]> > a2;
+    assert_same<take<3,seq>::type, types<void(int),char[3],long> > a3;
+    assert_same<take<4,seq>::type, seq> a4;
+}
+
 int main()
 {
 }
