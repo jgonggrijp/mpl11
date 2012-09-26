@@ -6,10 +6,10 @@
 
 #include <utility>
 
-#define RETURNS(...) noexcept(noexcept(decltype(__VA_ARGS__)(std::move(__VA_ARGS__)))) -> decltype(__VA_ARGS__)  { return (__VA_ARGS__); } typedef int RETURNS_CAT(RETURNS_, __LINE__)
-
-// Standard PP concatenation formula
-#define RETURNS_CAT_0(x, y) x ## y
-#define RETURNS_CAT(x, y) RETURNS_CAT_0(x,y)
-
+#define RETURNS(...)                                                    \
+    noexcept(noexcept(decltype(__VA_ARGS__)(std::move(__VA_ARGS__))))   \
+    -> decltype(__VA_ARGS__)                                            \
+    { return (__VA_ARGS__); }                                           \
+    static_assert(true, "") /* makes uses accept a trailing ";" */
+    
 #endif // RETURNS_DWA201243_HPP
